@@ -85,13 +85,15 @@ class Absen extends CI_Controller {
 			$start_date = $d['start_date'];
 			$end_date = $d['end_date'];
 			if ($kelas !='' || $mapel !='') {
-			  $where .= " AND ta.tanggal BETWEEN '$start_date' AND '$end_date' ";
+			  if($start_date !="" || $end_date!= ""){
+				$where .= " AND ta.tanggal BETWEEN '$start_date' AND '$end_date' ";
+			  }
 			}else{
 			  $where .= " ta.tanggal BETWEEN '$start_date' AND '$end_date' ";
 			}
         }
-        // $data['ql'] = $this->db->query("SELECT * FROM tb_siswa ts $where")->result_array();
-        $data['ql'] = $this->db->query("SELECT ts.nama, ts.nis, ta.tanggal,ta.status_absen, tm.nama as mapel, ta.id_mapel FROM tb_absen_pelajaran ta JOIN tb_siswa ts on ta.nis=ts.nis JOIN tb_mapel tm ON ta.id_mapel=tm.id $where GROUP BY ta.id_mapel")->result_array();
+        // echo "SELECT ts.nama, ts.nis, ta.tanggal,ta.status_absen, tm.nama as mapel, ta.id_mapel FROM tb_absen_pelajaran ta JOIN tb_siswa ts on ta.nis=ts.nis JOIN tb_mapel tm ON ta.id_mapel=tm.id $where GROUP BY ta.id_mapel";
+        $data['ql'] = $this->db->query("SELECT ts.nama, ts.nis, ta.tanggal,ta.status_absen, tm.nama as mapel, ta.id_mapel FROM tb_absen_pelajaran ta JOIN tb_siswa ts on ta.nis=ts.nis JOIN tb_mapel tm ON ta.id_mapel=tm.id $where")->result_array();
 		$data['content'] = "$this->low/mapel";
 		$data['query_mysql'] = $this->db->get("tb_absen_harian")->result_array();
         $this->load->view('guru/index',$data);
@@ -109,7 +111,7 @@ class Absen extends CI_Controller {
 		$data['data'] = null;
 		$data['kelas'] = $this->db->query("SELECT distinct(tk.nama),tk.id,tk.tipe_kelas FROM tb_kelas tk JOIN tb_jadwal tj ON tk.id=tj.id_kelas WHERE tj.nip='$_SESSION[nip]'")->result_array();
 		$data['mapel'] = $this->db->query("SELECT tm.* FROM tb_mapel tm JOIN tb_jadwal tj ON tm.id=tj.id_mapel WHERE tj.nip='$_SESSION[nip]'")->result_array();
-		
+
 		$data['type'] = 'add';
 		$this->load->view('guru/index',$data);
 	}
@@ -133,7 +135,7 @@ class Absen extends CI_Controller {
 			}
 		}
 	}
-		
+
 	public function edit(){
 		$data['title'] = "Tambah $this->cap";
 		$data['content'] = "$this->low/_form";
@@ -142,17 +144,17 @@ class Absen extends CI_Controller {
 		$data['mapel'] = $this->db->query("SELECT tm.* FROM tb_mapel tm JOIN tb_jadwal tj ON tm.id=tj.id_mapel WHERE tj.nip='$_SESSION[nip]'")->result_array();
 		$data['type'] = 'edit';
 		$this->load->view('guru/index',$data);
-		// $data['data'] = $this->db->get_where("$this->low", ['nis' => $id])->row_array();		
+		// $data['data'] = $this->db->get_where("$this->low", ['nis' => $id])->row_array();
 	}
 	public function detail($id){
 		$data['title'] = "Detail $this->cap";
 		$data['content'] = "$this->low/_detail";
 		$data['type'] = 'Ubah';
 		$data['kelas'] = $this->db->get("tb_kelas")->result_array();
-		$data['data'] = $this->db->get_where("$this->low", ['nis' => $id])->row_array();		
+		$data['data'] = $this->db->get_where("$this->low", ['nis' => $id])->row_array();
 		$this->load->view('guru/index',$data);
 	}
-	
+
 	public function ubah(){
 		$d = $_POST;
 		$qu = "";
@@ -174,13 +176,13 @@ class Absen extends CI_Controller {
 			echo "<script>alert('gagal ubah data');window.location='".base_url('guru/absen/edit')."'</script>";
 		}
 	}
-		
+
 	public function delete($id){
 		try{
 			$this->db->delete("$this->low", ['nis' => $id]);
 			$this->session->set_flashdata("message", ['success', "Berhasil Hapus Data $this->cap", 'Berhasil']);
 			redirect(base_url("admin/$this->low/"));
-			
+
 		}catch(Exception $e){
 			$this->session->set_flashdata("message", ['danger', "Gagal Hapus Data $this->cap", 'Gagal']);
 			redirect(base_url("admin/$this->low/"));

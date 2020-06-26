@@ -55,7 +55,7 @@
                 <?php
                 $where = "";
                 $d = $_POST;
-                  
+
                     foreach ($list as $data) {
 
                 ?>

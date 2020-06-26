@@ -57,7 +57,7 @@ class Pembayaran extends CI_Controller {
 		$data['list'] = $this->db->query("SELECT tk.*, ts.nama,ts.nis FROM tb_keterangan tk RIGHT JOIN tb_siswa ts ON tk.nis=ts.nis $where")->result_array();
         $this->load->view('backend/index',$data);
     }
-	
+
 	public function add()
 	{
 		$data['title'] = "Tambah $this->cap";
@@ -81,20 +81,20 @@ class Pembayaran extends CI_Controller {
 			$this->db->insert("$this->low",$d);
 			$this->session->set_flashdata("message", ['success', "Berhasil Tambah $this->cap", ' Berhasil']);
 			redirect(base_url("dashboard/pembayaran/"));
-			
+
 		}catch(Exception $e){
 			$this->session->set_flashdata("message", ['danger', "Gagal Tambah Data $this->cap", ' Gagal']);
 			redirect(base_url("dashboard/pembayaran/add"));
 			// $this->add();
 		}
 	}
-		
+
 	public function edit($id){
 		$data['title'] = "Ubah $this->cap";
 		$data['content'] = "$this->low/_form";
 		$data['type'] = 'Ubah';
 		$data['kelas'] = $this->db->get("tb_kelas")->result_array();
-		$data['data'] = $this->db->get_where("$this->low", ['id' => $id])->row_array();		
+		$data['data'] = $this->db->get_where("$this->low", ['id' => $id])->row_array();
 		$this->load->view('backend/index',$data);
 	}
 	public function detail($id){
@@ -102,10 +102,10 @@ class Pembayaran extends CI_Controller {
 		$data['content'] = "$this->low/_detail";
 		$data['type'] = 'Ubah';
 		$data['ql'] = $this->db->query("SELECT ta.*, ts.nama, ts.nis FROM tb_pembayaran ta JOIN tb_siswa ts on ta.nis=ts.nis where ts.nis='$id'")->result_array();
-		$data['data'] = $this->db->get_where("tb_siswa", ['nis' => $id])->row_array();		
+		$data['data'] = $this->db->get_where("tb_siswa", ['nis' => $id])->row_array();
 		$this->load->view('backend/index',$data);
 	}
-	
+
 	public function update($id){
 		$d = $_POST;
 		try{
@@ -115,24 +115,24 @@ class Pembayaran extends CI_Controller {
 				'jenis_pembayaran' => $d['jenis_pembayaran'],
 				'deskripsi' => $d['deskripsi'],
 			];
-			
+
 			$this->session->set_flashdata("message", ['success', "Ubah $this->cap Berhasil", ' Berhasil']);
 			$this->db->update("$this->low",$arr, ['id' => $id]);
 			redirect(base_url("dashboard/pembayaran/"));
-			
+
 		}catch(Exception $e){
 			$this->session->set_flashdata("message", ['danger', "Gagal Edit Data $this->cap", ' Gagal']);
 			redirect(base_url("dashboard/pembayaran/edit/".$id));
 			// $this->add();
 		}
 	}
-		
+
 	public function delete($id){
 		try{
-			$this->db->delete("$this->low", ['nis' => $id]);
+			$this->db->delete("$this->low", ['id' => $id]);
 			$this->session->set_flashdata("message", ['success', "Berhasil Hapus Data $this->cap", 'Berhasil']);
 			redirect(base_url("dashboard/pembayaran/"));
-			
+
 		}catch(Exception $e){
 			$this->session->set_flashdata("message", ['danger', "Gagal Hapus Data $this->cap", 'Gagal']);
 			redirect(base_url("dashboard/pembayaran/"));

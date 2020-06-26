@@ -31,12 +31,12 @@ class Absen extends CI_Controller {
 			if ("" != trim($kelas)) {
 			  $where .=" ta.id_kelas='$kelas' ";
 			}
-			
+
 			$start_date = $d['start_date'];
 			if ("" != trim($start_date)) {
 				$where .= " AND ta.tanggal like  '%$start_date%'";
 			}
-			
+
 		  }
         $data['ql'] = $this->db->query("SELECT * FROM tb_siswa ts JOIN tb_absen_harian ta ON ts.nis=ta.nis $where")->result_array();
 		$data['content'] = "$this->low/harian";
@@ -96,7 +96,7 @@ class Absen extends CI_Controller {
 				$where .=" ta.id_mapel='$mapel' ";
 			  }
 			}
-			
+
 			$start_date = $d['start_date'];
 			$end_date = $d['end_date'];
 			if ("" != trim($start_date) || "" != trim($end_date)) {
@@ -106,14 +106,14 @@ class Absen extends CI_Controller {
 				$where .= " ta.tanggal BETWEEN '$start_date' AND '$end_date' ";
 			  }
 			}
-			
+
 		  }
         $data['ql'] = $this->db->query("SELECT ts.nama, ts.nis, ta.tanggal,ta.status_absen, tm.nama as mapel, ta.id_mapel FROM tb_absen_pelajaran ta JOIN tb_siswa ts on ta.nis=ts.nis JOIN tb_mapel tm ON ta.id_mapel=tm.id $where GROUP BY ts.nis")->result_array();
 		$data['content'] = "$this->low/mapel";
 		$data['query_mysql'] = $this->db->get("tb_absen_harian")->result_array();
         $this->load->view('backend/index',$data);
     }
-	
+
 	public function add()
 	{
 		$data['title'] = "Tambah $this->cap";
@@ -130,7 +130,7 @@ class Absen extends CI_Controller {
 		try{
 			for ($i=0; $i < count($d['status_absen']) ; $i++) {
 				if ($d['status_absen'][$i] != '') {
-			
+
 					$nis = $d['nis'][$i];
 					$kelas = $d['kelas'];
 					$type = $d['type'];
@@ -143,7 +143,7 @@ class Absen extends CI_Controller {
 					if($jumlah < 1){
 						$q = "INSERT INTO tb_absen_harian(nis, tanggal, status_absen, id_kelas, type) VALUES('$nis', '$tanggal', '$status','$kelas', '$type')";;
 						$qu = $this->db->query($q);
-			
+
 					}else{
 						$q = "UPDATE tb_absen_harian SET status_absen='$status' WHERE nis='$nis' and tanggal like '%$now%'";
 						$qu = $this->db->query($q);
@@ -152,20 +152,20 @@ class Absen extends CI_Controller {
 			}
 			$this->session->set_flashdata("message", ['success', "Berhasil Ngisi $this->cap", ' Berhasil']);
 			redirect(base_url("dashboard/absen/absensi_harian"));
-			
+
 		}catch(Exception $e){
 			$this->session->set_flashdata("message", ['danger', "Gagal Tambah Data $this->cap", ' Gagal']);
 			redirect(base_url("dashboard/absen/absensi_harian"));
 			// $this->add();
 		}
 	}
-		
+
 	public function edit($id){
 		$data['title'] = "Ubah $this->cap";
 		$data['content'] = "$this->low/_form";
 		$data['type'] = 'Ubah';
 		$data['kelas'] = $this->db->get("tb_kelas")->result_array();
-		$data['data'] = $this->db->get_where("$this->low", ['nis' => $id])->row_array();		
+		$data['data'] = $this->db->get_where("$this->low", ['nis' => $id])->row_array();
 		$this->load->view('backend/index',$data);
 	}
 	public function detail($id){
@@ -173,7 +173,7 @@ class Absen extends CI_Controller {
 		$data['content'] = "$this->low/_detail";
 		$data['type'] = 'Ubah';
 		$data['kelas'] = $this->db->get("tb_kelas")->result_array();
-		$data['data'] = $this->db->get_where("$this->low", ['nis' => $id])->row_array();		
+		$data['data'] = $this->db->get_where("$this->low", ['nis' => $id])->row_array();
 		$this->load->view('backend/index',$data);
 	}
 }

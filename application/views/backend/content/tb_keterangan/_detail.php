@@ -13,9 +13,9 @@
           <!-- DataTales Example -->
           <div class="card shadow mb-4">
             <div class="card-header py-3">
-              <h6 class="m-0 font-weight-bold text-primary">   
+              <h6 class="m-0 font-weight-bold text-primary">
               Detail Pelanggaran <?= $data['nama'] ?></h6>
-              
+
             </div>
             <div class="card-body">
             <table class="table table-bordered dataTable" id="dataTable">
@@ -25,13 +25,12 @@
                       <th>Jenis</th>
                       <th>Deskripsi</th>
                       <th>Point</th>
-                  </tr>
-                  
+
                </thead>
                <tbody>
-               
+
                 <?php
-               
+
                   $jenis = ['', 'sedang', 'berat', 'sangat berat'];
                         foreach ($ql as $data) {
 
