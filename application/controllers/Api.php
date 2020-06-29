@@ -100,43 +100,78 @@ class Api extends CI_Controller{
     }
 
     public function suket_guru(){
-      $d = $_POST;
-      $cekdatasuket = $this->db->get_where("tb_keterangan")->num_rows();
-      if ($cekdatasuket!=0) {
-        $datasuket['list'] = $this->db->query("SELECT tk.*, ts.nama, ts.nis, tkls.nama as kelas FROM tb_keterangan tk JOIn tb_siswa ts ON tk.nis=ts.nis JOIn tb_kelas tkls ON ts.id_kelas=tkls.id")->result_array();
-        $suketrespon = array(
-          'datasuket' => $datasuket
+        $nip = $this->input->post('nip');
+        $kelas = $this->input->post('kelas');
+
+        $cek = $this->db->query("SELECT *from tb_absen_pelajaran, tb_siswa, tb_keterangan, tb_kelas WHERE nip ='$nip' AND tb_absen_pelajaran.id_kelas = '$kelas' AND tb_siswa.nis = tb_absen_pelajaran.nis AND tb_siswa.nis = tb_keterangan.nis AND tb_kelas.id = tb_siswa.id_kelas ")->num_rows();
+
+        if($cek){
+        $cekdatasuket = $this->db->query("SELECT tb_keterangan.*, tb_siswa.nama as nama_siswa, tb_absen_pelajaran.nip as nip_guru, tb_kelas.nama as kelas from tb_absen_pelajaran, tb_keterangan, tb_siswa, tb_kelas WHERE nip ='$nip' and tb_absen_pelajaran.id_kelas = '$kelas'
+          AND tb_siswa.nis = tb_absen_pelajaran.nis AND tb_siswa.nis = tb_keterangan.nis  AND tb_kelas.id = tb_siswa.id_kelas GROUP BY id, kelas")->result_array();
+        // JOIN tb_guru tk ON ts.nip=tk.nip
+          $datasuketrespon = array(
+            'datasuketguru' => $cekdatasuket
+          );
+          echo json_encode($datasuketrespon);
+        }else {
+          $datasuketrespon = array(
+            'message' => "Data tidak ditemukan"
+          );
+          echo json_encode($datasuketrespon);
+        }
+    }
+
+    public function data_absenmapel(){
+      $nip = $this->input->post("nip");
+      $cek = $this->db->query("SELECT *from tb_absen_pelajaran,tb_siswa,tb_kelas WHERE nip ='$nip' AND tb_siswa.nis = tb_absen_pelajaran.nis AND tb_kelas.id = tb_absen_pelajaran.id_kelas")->num_rows();
+      if($cek){
+        $cekabsenmapel = $this->db->query("SELECT tb_absen_pelajaran.*, tb_siswa.nama as siswa, tb_kelas.nama as kelas from tb_absen_pelajaran,tb_siswa,tb_kelas WHERE nip = '$nip' AND tb_siswa.nis = tb_absen_pelajaran.nis AND tb_kelas.id = tb_absen_pelajaran.id_kelas GROUP BY id_kelas, kelas")->result_array();
+        $dataabsen = array(
+          'absenmapel' => $cekabsenmapel
         );
-        echo json_encode($suketrespon);
-      }else {
-  			$suketrespon = array(
-  				'message' => "Data tidak ditemukan"
-  			);
-  			echo json_encode($suketrespon);
+        echo json_encode($dataabsen);
+      } else {
+        $dataabsen = array(
+          'message' => "Data Tidak Ditemukan"
+        );
+        echo json_encode($dataabsen);
       }
     }
 
-    public function absensi_mapel(){
-      $absenmapel = $_POST;
-      $nis = $absenmapel['nis'];
+    public function list_absen(){
+      $nip = $this->input->post("nip");
+      $cek = $this->db->query("SELECT *from tb_jadwal,tb_kelas,tb_mapel WHERE nip ='$nip' AND tb_kelas.id = tb_jadwal.id_kelas AND tb_mapel.id = tb_jadwal.id_mapel")->num_rows();
+      if($cek){
+        $cekinputabsen = $this->db->query("SELECT tb_jadwal.*, tb_kelas.nama as kelas, tb_mapel.nama as mapel from tb_jadwal,tb_kelas,tb_mapel WHERE nip = '$nip' AND tb_kelas.id = tb_jadwal.id_kelas AND tb_mapel.id = tb_jadwal.id_mapel GROUP by id_kelas,id_mapel")->result_array();
+        $datainputabsen = array(
+          'datainputabsen' => $cekinputabsen
+        );
+        echo json_encode($datainputabsen);
+      } else {
+        $datainputabsen = array(
+          'message' => "Data tidak ditemukan"
+        );
+        echo json_encode($datainputabsen);
+      }
+    }
 
-      $cekabsenmapel = $this->db->query("SELECT * from tb_guru ts JOIN tb_absen_pelajaran tm ON ts.nip=tm.nip JOIN tb_mapel tk ON tm.id_mapel=tk.id WHERE tm.nis ='$nis'")->num_rows();
+    public function absen_mapel(){
+      $nis = $this->input->post('nis');
+      $tanggal1 = $this->input->post('tanggal');
+
+      $cek = $this->db->query("SELECT *from tb_absen_pelajaran,tb_guru,tb_mapel WHERE nis ='$nis' AND date_format(tanggal, '%Y-%m-%d') = '$tanggal1' AND tb_guru.nip = tb_absen_pelajaran.nip AND tb_mapel.id = tb_absen_pelajaran.id_mapel ")->num_rows();
+      if($cek){
+      $cekabsenmapel = $this->db->query("SELECT tb_absen_pelajaran.*, tb_guru.nama as guru, tb_mapel.nama as mapel from tb_absen_pelajaran,tb_guru,tb_mapel WHERE nis ='$nis' AND date_format(tanggal, '%Y-%m-%d') = '$tanggal1' AND tb_guru.nip = tb_absen_pelajaran.nip AND tb_mapel.id = tb_absen_pelajaran.id_mapel ")->result_array();
       // JOIN tb_guru tk ON ts.nip=tk.nip
-
-      if ($cekabsenmapel!=0) {
-
-        $dataabsenmapel = $this->db->query("SELECT tm.*, ts.nama as guru, tk.nama as mapel from tb_absen_pelajaran tm JOIN tb_guru ts ON tm.nip=ts.nip JOIN tb_mapel tk ON tm.id_mapel=tk.id WHERE tm.nis ='$nis'")->result_array();
-        // tk.nama as guru from tb_absen_pelajaran tm JOIN tb_guru tk ON tm.nip=tk.nip WHERE tm.nis
-        // tk.nama as guru from tb_absen_pelajaran ts JOIN tb_guru tk ON ts.nip=tk.nip AND
         $absenresponmapel = array(
-          'datamapel' => $dataabsenmapel
+          'datamapel' => $cekabsenmapel
         );
         echo json_encode($absenresponmapel);
       }else {
   			$absenresponmapel = array(
   				'message' => "Data tidak ditemukan"
   			);
-  			echo json_encode($absenrespon1);
+  			echo json_encode($absenresponmapel);
       }
     }
 
@@ -196,92 +231,59 @@ class Api extends CI_Controller{
       }
     }
 
-    public function input_suket() {
-      $d = $_POST;
-      $f = $_FILES;
-      $type = str_replace("image/", "", $_FILES['foto']['type']);
-			$nametodb = $_FILES['foto']['name'];
-			// move_uploaded_file($_FILES['foto']['tmp_name'], "../../foto/siswa/".$nametodb);
-			Input_Helper::uploadImage($f['foto'], 'surat', $nametodb);
-			$d['foto'] = $nametodb;
-			$this->db->insert("tb_keterangan",$d);
+    public function input_absen(){
+      $abseninput = $this->input->post('status_absen');
+      $nip = $this->input->post('nip');
+      $nis = $this->input->post('nis');
+      $kelas = $this->input->post('id_kelas');
+      $mapel = $this->input->post('id_mapel');
+      $jam = $this->input->post('jam');
+
+      $data = array(
+        'nip' => $nip,
+        'status_absen' => $abseninput,
+        'nis' => $nis,
+        'id_kelas' => $kelas,
+        'id_mapel' => $mapel,
+        'jam' => $jam
+      );
+
+      $this->db->insert("tb_absen_pelajaran",$data);
 
       $response = array(
-        'status' => 'true'
+        'stat' => 'true'
       );
       echo json_encode($response);
     }
 
+    function tes(){
+      $ket = $this->input->post('input_suket');
+      $tgl = date('Y-m-d H:i:s');
+      $foto = $this->input->post('foto');
+      $nis = $this->input->post('nis');
+
+    			// convert the image data from base64
+    			$imgData = base64_decode($foto);
+    			// set the image paths
+    			$path = './foto/surat/';
+    			$file = uniqid().'.png';
+    			$file_path = $path.$file;
+
+    			file_put_contents($file_path, $imgData);
+
+                  $data = array(
+                    'nis' => $nis,
+                    'jenis' => $ket,
+                    'tanggal' => $tgl,
+                    'foto' => $file
+                  );
+
+         $this->db->insert("tb_keterangan",$data);
+
+    		$response = array(
+    			'stat' => 'true'
+        );
+        echo json_encode($response);
+    	}
+
 }
-
-
-
-// $foto = str_replace("image/", "", $_FILES['foto']['type']);
-// $nametodb = $d['nis'].".".$foto;
-//
-// Input_Helper::uploadImage($f['foto'], 'siswa', $nametodb);
-// $d['foto'] = $nametodb;
-
-// $nis = $this->input->post('nis');
-// $jenis = $this->input->post('jenis');
-// // $foto = $this->input->post('foto');
-// //$gambar = $this->input->post('gambar');
-// $data = array(
-//   'nis' => $nis,
-//   'jenis' => $jenis,
-//   'foto' => $foto
-// );
-// $this->db->insert('tb_keterangan',$data);
-// $getsuket = $this->db->get_where($data)->result();
-
-// $imgData = base64_decode($foto);
-// // set the image paths
-// // $path = './foto/surat/';
-// $file = uniqid().'.jpeg';
-// $file_path = $path.$file;
-
-// public function input_suket(){
-// 	$foto_suket = $this->input->post('foto');
-//   $keterangan = $this->input->post('jenis');
-//
-//   $data = array(
-//     'foto' => $foto_suket,
-//     'jenis' => $keterangan
-//   );
-//   $this->db->input_data($data,'tb_keterangan');
-//   echo json_encode($array);
-//   }
-
-// public function kelas(){
-//   $kelas = $_POST;
-//   $id = $kelas['id'];
-//   $cekkelas = $this->db->get_where("tb_kelas.id = tb_siswa.id_kelas", ['id' => $id])->num_rows();
-//   if ($cekkelas!=0) {
-//     $datakelas = $cekkelas = $this->db->get_where("tb_kelas", ['id' => $id])->row_array();
-//     $kelasrespon = array(
-//       'datakelas' => $datakelas
-//     );
-//     echo json_encode($kelasrespon);
-//   }else {
-//     $kelasrespon = array(
-//       'message' => "Akun tidak ditemukan"
-//     );
-//     echo json_encode($kelasrespon);
-//   }
-// }
-
-// public function qrcode(){
-//   $p = $_POST;
-//   $qrcode = $p['nis'];
-//   $cekqr = $this->db->get_where("tb_siswa", ['id' => $qrcode])->num_rows();
-//   if ($cekqr!=0) {
-//     $cekqr = $this->db->get_where("tb_siswa", ['id' => $qrcode])->row_array();
-//     $qrresponse = $qrcode;
-//     redirect(base_url('dashboard/siswa/generate/'.$qrcode));
-//   }else {
-// 		$qrresponse = array(
-// 			'message' => "Tidak ditemukan"
-// 		);
-// 		echo json_encode($qrresponse);
-// 	}
-// }
