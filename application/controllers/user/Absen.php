@@ -18,7 +18,6 @@ class Absen extends CI_Controller { //mengextends CI_Controller
         $data['content'] = "absen/absen_mapel";
         $data['queryKelas'] =$this->db->query("SELECT tm.nama as mapel, tp.nis, tp.id_mapel FROM tb_absen_pelajaran tp JOIN tb_mapel tm ON tp.id_mapel=tm.id where tp.nis='$nis'  $where GROUP BY tp.id_mapel")->result_array();
 		$this->load->view('user/index',$data);
-
     }
     public function absen_sekolah () {
         $data['title'] = "Absen";
